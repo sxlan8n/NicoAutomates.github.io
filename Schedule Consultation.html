@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programar Consulta</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.css">
+    <style>
+        body {
+            font-family: 'Inter', 'Arial', sans-serif;
+            background: #10151a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #eaf6fb;
+            position: relative;
+            overflow-x: hidden;
+        }
+        #bg-anim {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .appointment-container {
+            max-width: 500px;
+            margin: 48px auto;
+            background: rgba(22, 28, 38, 0.98);
+            padding: 38px 32px 32px 32px;
+            border-radius: 18px;
+            box-shadow: 0 0 32px 0 rgba(0,255,180,0.10), 0 2px 24px 0 rgba(0,0,0,0.25);
+            border: 2px solid #1e2d3d;
+            position: relative;
+            overflow: hidden;
+        }
+        .appointment-container::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            z-index: 0;
+            border-radius: 20px;
+            background: linear-gradient(120deg, #00ffb0 0%, #0099ff 100%);
+            opacity: 0.18;
+            filter: blur(12px);
+            pointer-events: none;
+        }
+        .appointment-container > * {
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            color: #00ffb0;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-shadow: 0 0 12px #00ffb088, 0 0 2px #fff;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #0099ff;
+            letter-spacing: 0.5px;
+        }
+        .form-control {
+            background: rgba(16,21,26,0.92);
+            border: 1.5px solid #00ffb0;
+            color: #eaf6fb;
+            border-radius: 8px;
+            box-shadow: 0 0 8px 0 #00ffb044;
+            transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .form-control:focus {
+            border: 1.5px solid #0099ff;
+            box-shadow: 0 0 16px 0 #0099ff88, 0 0 4px #00ffb088;
+            background: rgba(16,21,26,1);
+            color: #fff;
+        }
+        textarea.form-control {
+            min-height: 80px;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(90deg, #00ffb0 0%, #0099ff 100%);
+            color: #10151a;
+            border: none;
+            border-radius: 999px;
+            box-shadow: 0 0 16px #00ffb088, 0 0 8px #0099ff88;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+        .btn-submit:hover, .btn-submit:focus {
+            background: linear-gradient(90deg, #0099ff 0%, #00ffb0 100%);
+            color: #fff;
+            box-shadow: 0 0 32px #0099ffcc, 0 0 16px #00ffb0cc;
+        }
+        .lang-switcher {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+        .lang-switcher select {
+            width: auto;
+            padding: 4px 12px;
+            border-radius: 8px;
+            border: 1.5px solid #0099ff;
+            background: rgba(16,21,26,0.92);
+            color: #00ffb0;
+            font-weight: 600;
+            box-shadow: 0 0 8px #0099ff44;
+            transition: border 0.2s, color 0.2s;
+        }
+        .lang-switcher select:focus {
+            border: 1.5px solid #00ffb0;
+            color: #0099ff;
+            outline: none;
+        }
+        ::placeholder {
+            color: #a6ffe6;
+            opacity: 1;
+            font-style: italic;
+        }
+        /* Flatpickr overrides */
+        .flatpickr-calendar {
+            background: #fff !important;
+            border: 2px solid #0099ff !important;
+            box-shadow: 0 0 16px #0099ff44;
+            color: #232946 !important;
+        }
+        .flatpickr-months, .flatpickr-weekdays {
+            background: #f5f7fa !important;
+            color: #232946 !important;
+        }
+        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+            background: linear-gradient(90deg, #0099ff 0%, #00ffb0 100%) !important;
+            color: #fff !important;
+            border-radius: 6px !important;
+        }
+        .flatpickr-day.today {
+            border-color: #0099ff !important;
+        }
+        .flatpickr-day:hover {
+            background: #00ffb0 !important;
+            color: #fff !important;
+        }
+        .flatpickr-time input, .flatpickr-time .flatpickr-am-pm {
+            background: #f5f7fa !important;
+            color: #232946 !important;
+            border: 1px solid #0099ff !important;
+        }
+        .flatpickr-current-month input.cur-year {
+            background: #fff !important;
+            color: #232946 !important;
+        }
+        .flatpickr-monthDropdown-months, .flatpickr-monthDropdown-month {
+            background: #fff !important;
+            color: #232946 !important;
+        }
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #18222e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(120deg, #0099ff 0%, #00ffb0 100%);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-anim"></canvas>
+    <div class="appointment-container">
+        <div class="lang-switcher">
+            <select id="langSelect">
+                <option value="en">EN</option>
+                <option value="fr">FR</option>
+                <option value="es">ES</option>
+            </select>
+        </div>
+        <h1 id="title">Schedule Consultation</h1>
+        <form id="appointmentForm" action="http://localhost:5678/webhook-test/eb889273-81b5-4773-a9dd-6fd2e40c628f" method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label" id="labelName">Full Name</label>
+                <input type="text" class="form-control" id="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label" id="labelEmail">Email</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="date" class="form-label" id="labelDate">Consultation Date</label>
+                <input type="text" class="form-control" id="date" placeholder="Select a date" required>
+            </div>
+            <div class="mb-3">
+                <label for="time" class="form-label" id="labelTime">Consultation Time</label>
+                <input type="text" class="form-control" id="time" placeholder="Select a time" required>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label" id="labelNotes">Additional Notes</label>
+                <textarea class="form-control" id="notes" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-submit" id="submitBtn">Schedule Consultation</button>
+        </form>
+        <div id="thankYouMsg" style="display:none; margin-top:32px; text-align:center; font-size:1.2rem; color:#00ffb0; font-weight:600;"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script>
+        // Traducciones
+        const translations = {
+            en: {
+                title: "Schedule Consultation",
+                labelName: "Full Name",
+                labelEmail: "Email",
+                labelDate: "Consultation Date",
+                labelTime: "Consultation Time",
+                labelNotes: "Additional Notes",
+                submitBtn: "Schedule Consultation",
+                datePlaceholder: "Select a date",
+                timePlaceholder: "Select a time"
+            },
+            fr: {
+                title: "Programmer une consultation",
+                labelName: "Nom complet",
+                labelEmail: "E-mail",
+                labelDate: "Date de consultation",
+                labelTime: "Heure de consultation",
+                labelNotes: "Notes supplémentaires",
+                submitBtn: "Programmer la consultation",
+                datePlaceholder: "Sélectionnez une date",
+                timePlaceholder: "Sélectionnez une heure"
+            },
+            es: {
+                title: "Programar Consulta",
+                labelName: "Nombre Completo",
+                labelEmail: "Correo Electrónico",
+                labelDate: "Fecha de Consulta",
+                labelTime: "Hora de Consulta",
+                labelNotes: "Notas Adicionales",
+                submitBtn: "Programar Consulta",
+                datePlaceholder: "Selecciona una fecha",
+                timePlaceholder: "Selecciona una hora"
+            }
+        };
+
+        // Flatpickr instances
+        let datePicker, timePicker;
+
+        function setFlatpickrLocale(lang) {
+            // Destroy previous instances if exist
+            if (datePicker) datePicker.destroy();
+            if (timePicker) timePicker.destroy();
+
+            let locale = lang === "fr" ? "fr" : lang === "es" ? "es" : "default";
+            datePicker = flatpickr("#date", {
+                altInput: true,
+                altFormat: "l, d F Y",
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                locale: locale
+            });
+            timePicker = flatpickr("#time", {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+                time_24hr: true,
+                locale: locale
+            });
+        }
+
+        function updateTexts(lang) {
+            document.getElementById("title").textContent = translations[lang].title;
+            document.getElementById("labelName").textContent = translations[lang].labelName;
+            document.getElementById("labelEmail").textContent = translations[lang].labelEmail;
+            document.getElementById("labelDate").textContent = translations[lang].labelDate;
+            document.getElementById("labelTime").textContent = translations[lang].labelTime;
+            document.getElementById("labelNotes").textContent = translations[lang].labelNotes;
+            document.getElementById("submitBtn").textContent = translations[lang].submitBtn;
+            document.getElementById("date").placeholder = translations[lang].datePlaceholder;
+            document.getElementById("time").placeholder = translations[lang].timePlaceholder;
+        }
+
+        // Inicialización por defecto en inglés
+        document.documentElement.lang = "en";
+        updateTexts("en");
+        setFlatpickrLocale("en");
+
+        document.getElementById("langSelect").addEventListener("change", function() {
+            const lang = this.value;
+            document.documentElement.lang = lang;
+            updateTexts(lang);
+            setFlatpickrLocale(lang);
+        });
+
+        // Fondo animado de partículas
+        (function(){
+            const canvas = document.getElementById('bg-anim');
+            const ctx = canvas.getContext('2d');
+            let w = window.innerWidth, h = window.innerHeight;
+            let particles = [];
+            const colors = ['#00ffb0', '#0099ff', '#ffffff22'];
+            function resize() {
+                w = window.innerWidth; h = window.innerHeight;
+                canvas.width = w; canvas.height = h;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            function Particle() {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+                this.r = 1.2 + Math.random() * 2.2;
+                this.c = colors[Math.floor(Math.random()*colors.length)];
+                this.dx = (Math.random()-0.5) * 0.6;
+                this.dy = (Math.random()-0.5) * 0.6;
+                this.a = 0.5 + Math.random()*0.5;
+            }
+            for(let i=0;i<48;i++) particles.push(new Particle());
+            function draw() {
+                ctx.clearRect(0,0,w,h);
+                for(let p of particles) {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                    ctx.fillStyle = p.c;
+                    ctx.globalAlpha = p.a;
+                    ctx.shadowColor = p.c;
+                    ctx.shadowBlur = 12;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    ctx.shadowBlur = 0;
+                    p.x += p.dx; p.y += p.dy;
+                    if(p.x<0||p.x>w) p.dx*=-1;
+                    if(p.y<0||p.y>h) p.dy*=-1;
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+
+        // Mensajes de agradecimiento por idioma
+        const thankYouMessages = {
+            en: "Thank you very much! You will soon receive an email confirming our availability.",
+            fr: "Merci beaucoup ! Vous recevrez bientôt un e-mail confirmant notre disponibilité.",
+            es: "¡Muchas gracias! En breves momentos recibirás un email confirmando nuestra disponibilidad."
+        };
+
+        // Interceptar el envío del formulario para mostrar el mensaje de agradecimiento
+        document.getElementById("appointmentForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const lang = document.getElementById("langSelect").value;
+            document.getElementById("appointmentForm").style.display = "none";
+            document.getElementById("thankYouMsg").textContent = thankYouMessages[lang] || thankYouMessages["en"];
+            document.getElementById("thankYouMsg").style.display = "block";
+
+            // Enviar los datos manualmente al webhook
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: "POST",
+                body: formData
+            });
+        });
+    </script>
+</body>
+</html>
